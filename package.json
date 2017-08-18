@@ -1,0 +1,33 @@
+{
+  "name": "proofread",
+  "version": "0.1.0",
+  "description": "Saga proofread - testing tool for redux sagas",
+  "main": "lib/index.js",
+  "keywords": [
+    "test",
+    "testing",
+    "saga",
+    "redux",
+    "redux-saga"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streamich/proofread.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "20.0.4",
+    "babel-cli": "6.24.1",
+    "babel-preset-es2015": "6.24.1",
+    "source-map-support": "0.4.15",
+    "nyc": "11.1.0",
+    "watch": "^1.0.0",
+    "redux-saga": "^0.15.6"
+  },
+  "scripts": {
+    "build": "npm run build-js",
+    "build-js": "babel src --out-dir lib",
+    "test": "jest demo/",
+    "watch": "watch 'npm run build' ./src"
+  }
+}
