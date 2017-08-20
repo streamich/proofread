@@ -16,36 +16,125 @@ function compare(val1, val2) {
     }
 }
 
-export const read = (iterator1, iterator2) => {
-    let obj1;
-    let obj2;
-    let yielded;
 
-    if (typeof iterator1 === 'function') {
-        iterator1 = iterator1();
+export const sym = id => `@@proofread/${id}`;
+
+const IO = sym('IO');
+const SKIP = 'SKIP';
+
+export const effect = (type, payload) => ({[IO]: true, [type]: payload});
+
+export function skip(number) {
+    return effect(SKIP, {number});
+}
+
+export const __ = skip();
+
+
+function isIterator(iter) {
+    return !iter || (typeof iter !== 'object') || (typeof iter.next !== 'function');
+}
+
+function isIteratorOrFunction(iter) {
+    return (typeof iter === 'function') || isIterator(iter);
+}
+
+function getIteratorOrThrow(iter, args) {
+    if(typeof iter === 'function') iter = iter(...args);
+
+    if(isIterator(iter))
+        throw new TypeError('Expected saga to be an iterator or a generator function.');
+
+    return iter;
+}
+
+
+export class Reader {
+
+    constructor(saga, args) {
+        this.saga = saga;
+        this.gen = getIteratorOrThrow(saga, args || []);
+        this.history = [];
     }
 
-    if (typeof iterator2 === 'function') {
-        iterator2 = iterator2();
+    read(genFunc, args) {
+        const gen = getIteratorOrThrow(genFunc, args || []);
+        while(this._step(gen));
     }
 
-    const iterate = () => {
-        obj2 = iterator2.next((value) => {
+    _step(gen) {
+        let obj1;
+        let obj2;
+        let yielded;
+
+        obj2 = gen.next(value => {
             yielded = value;
         });
-        return !obj2.done;
-    };
 
-    while (iterate()) {
-        obj1 = iterator1.next(yielded);
-        compare(obj1.value, obj2.value);
-    }
-
-    // `return` was called?
-    if (typeof obj2.value !== 'undefined') {
-        obj1 = iterator1.next(yielded);
-        if (obj1.done !== true) {
-            throw new Error('Expected saga to end.');
+        if(obj2.done) {
+            if(typeof obj2.value !== 'undefined') {
+                // Return was called.
+                obj1 = this.gen.next(yielded);
+                if(obj1.done !== true) {
+                    throw new Error('Expected saga to end.');
+                }
+            }
+            return false;
         }
+
+        this.history.push(yielded);
+
+        obj1 = this.gen.next(yielded);
+
+        if(obj1.done) {
+            throw new Error('Saga ended abruptly.');
+        }
+
+        if(obj2.value && (typeof obj2.value === 'object') && (obj2.value[IO] === true)) {
+            if(typeof obj2.value[SKIP] !== 'undefined') {
+
+            }
+        } else {
+            compare(obj1.value, obj2.value);
+        }
+
+        return true;
     }
+
+    clone() {
+        const reader = new Reader(this.saga, this.args);
+        this.history.forEach(yielded => reader.gen.next(yielded));
+        reader.history = this.history.slice();
+        return reader;
+    }
+
+    next(arg) {
+        this.history.push(arg);
+        return this.gen.next(arg);
+    }
+
+    'return'(value) {
+        this.gen.return(value);
+    }
+
+    'throw'(exception) {
+        this.gen.throw(exception);
+    }
+}
+
+
+export const read = (saga, args, reading) => {
+    if(typeof args === 'function') {
+        reading = args;
+        args = [];
+    }
+
+    if(!(args instanceof Array)) args = [];
+
+    const reader = new Reader(saga, args);
+
+    if(isIteratorOrFunction(reading))
+        reader.read(reading);
+
+    return reader;
 };
