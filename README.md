@@ -1,6 +1,8 @@
-# proofread [![npm-img]][npm-url]
+# proofread
 
-Proofread your Redux sagas. Sagas are stories that need to be proofread.
+[![npm-img]][npm-url]
+
+Proofread your Redux sagas. Saga testing tool.
 
     npm install --save-dev proofread
 
@@ -47,7 +49,15 @@ alternative reading and errors are thrown if any step of the reading does not ma
 
 See `/demo` folder for examples.
 
+
 ### Yielding value and specifying end
+
+Each yield in the test generator returns a function. You can call that
+function with the value you want to be returned to your original saga:
+
+```js
+(yield select(getSomething())(/* ... */);
+```
 
 Consider this saga:
 
@@ -87,7 +97,7 @@ read(saga, function* () {
 });
 ```
 
-Here we also provide the yielded value of the `select` effect, like this:
+Here we provide the yielded value of the `select` effect, like this:
 `(yield select(getIsAuthenticated))(false);`.
 
 You would also want to test the saga when the `if()` branch is failing,
@@ -116,23 +126,57 @@ read(saga, function* () {
 });
 ```
 
-This line
-
-```js
-(yield select(getIsAuthenticated))(true);
-```
-
-Sets the `isAuthenticated` to true to fail the if-statement.
-
-The return statement:
+This time the `return true;` statements checks that the saga ended.
 
 ```js
 return true;
 ```
 
-Tests that saga ends. It makes sure that the test saga ends.
+
+## Skipping steps
+
+If you want to skip an effect in your saga, use `__`:
+
+```js
+import {__} from 'proofread';
+
+read(saga, function* () {
+    yield __;
+    yield __;
+    yield take('SOME_ACTION');
+});
+```
 
 
+
+## Cloneable generator
+
+The `read` method returns a generator object:
+
+```js
+let gen = read(saga, args);
+```
+
+So you can use it to test your sagas in conventional way as well, if you like:
+
+```js
+expect(gen.next().value).toEqual(/* ... */);
+```
+
+At any point in time you can clone that generator. You will receive
+a new one at the same location in the saga:
+
+```js
+let gen2 = gen.clone();
+```
+
+You can also use those generators to test your saga in proofreading way:
+
+```js
+gen2.read(function* () {
+    yield put(someAction());
+});
+```
 
 
 
