@@ -133,8 +133,10 @@ export const read = (saga, args, reading) => {
 
     const reader = new Reader(saga, args);
 
-    if(isIteratorOrFunction(reading))
-        reader.read(reading);
+    if(reading) {
+        if(isIteratorOrFunction(reading))
+            reader.read(reading);
+    }
 
     return reader;
 };
