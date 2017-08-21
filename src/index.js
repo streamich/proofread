@@ -74,10 +74,22 @@ export class Reader {
         if(obj2.done) {
             if(typeof obj2.value !== 'undefined') {
                 // Return was called.
-                obj1 = this.gen.next(yielded);
-                if(obj1.done !== true) {
-                    throw new Error('Expected saga to end.');
+                if(obj2.done) {
+
+                    // return true - expect saga to end
+                    obj1 = this.gen.next(yielded);
+                    if(obj1.done !== true) {
+                        throw new Error('Expected saga to end.');
+                    }
+                } else {
+
+                    // return false - expect saga to continue
+                    obj1 = this.gen.next(yielded);
+                    if(obj1.done === true) {
+                        throw new Error('Expected saga to continue.');
+                    }
                 }
+
             }
             return false;
         }
@@ -133,8 +145,10 @@ export const read = (saga, args, reading) => {
 
     const reader = new Reader(saga, args);
 
-    if(isIteratorOrFunction(reading))
-        reader.read(reading);
+    if(reading) {
+        if(isIteratorOrFunction(reading))
+            reader.read(reading);
+    }
 
     return reader;
 };
