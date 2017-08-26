@@ -1,15 +1,11 @@
 {
   "name": "proofread",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Saga proofread - testing tool for redux sagas",
   "main": "lib/index.js",
   "keywords": [
-    "test",
-    "testing",
-    "saga",
-    "redux",
-    "redux-saga",
-    "generator"
+    "test", "testing", "saga", "redux", "redux-saga",
+    "generator", "jest", "expect", "unit", "unittest"
   ],
   "repository": {
     "type": "git",

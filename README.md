@@ -178,6 +178,41 @@ gen2.read(function* () {
 });
 ```
 
+## Throwing errors
+
+If saga throws an error, you can specify it by throwing an error in your
+proofreading saga. To match any error, throw skip `__` effect:
+
+```js
+read(saga, function* () {
+    throw __;
+});
+```
+
+Or specify the error more exactly by matching it:
+
+```js
+read(saga, function* () {
+    throw new Error('message...');
+});
+```
+
+## Returns
+
+Similarly, if your saga returns a value you can test it with a return
+statement, to match any return value:
+
+```js
+read(saga, function* () {
+    return __;
+});
+```
+
+Or you can specify an exact value the return statement has to match.
+You can also use `return __;` to check that saga has finished.
+
+
+
 
 
 

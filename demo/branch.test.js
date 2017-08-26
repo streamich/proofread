@@ -1,6 +1,6 @@
 import {saga, action, getIsAuthenticated} from "./branch";
 import {take, put, select} from 'redux-saga/effects';
-import {read} from '../src/index';
+import {read, __} from '../src/index';
 
 
 describe('branch testing and test for saga end', () => {
@@ -24,7 +24,7 @@ describe('branch testing and test for saga end', () => {
             read(saga, function* () {
                 yield take('AUTHENTICATE');
                 (yield select(getIsAuthenticated))(true);
-                return true;
+                return __;
             });
         });
         it('if(true)', () => {
@@ -32,7 +32,7 @@ describe('branch testing and test for saga end', () => {
                 yield take('AUTHENTICATE');
                 (yield select(getIsAuthenticated))(false);
                 yield put(action());
-                return true;
+                return undefined;
             });
         });
     });
