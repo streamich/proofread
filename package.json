@@ -19,7 +19,7 @@
     "nyc": "15.1.0",
     "source-map-support": "0.5.19",
     "watch": "1.0.2",
-    "redux-saga": "0.16.0"
+    "redux-saga": "0.16.2"
   },
   "scripts": {
     "build": "npm run build-js",
